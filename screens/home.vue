@@ -105,6 +105,7 @@ export default {
     },
 
     reset() {
+      const store = this.screenProps.store;
       store.commit('reset');
     },
   },

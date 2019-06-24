@@ -38,7 +38,7 @@ export default {
   async mounted() {
     this.checkSubscription();
     this._loadingTimer = setTimeout(() => {
-      if (loading) {
+      if (this.loading) {
         this.subscribed = true; // don't show subscribe button if something is broken
         this.loading = false;
       }
