@@ -100,11 +100,12 @@ export default {
     },
 
     goToForm() {
+      this.reset();
       this.navigation.navigate('Form');
     },
 
-    clearData() {
-      this.data = null;
+    reset() {
+      store.commit('reset');
     },
   },
 };
