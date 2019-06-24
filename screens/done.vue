@@ -37,13 +37,13 @@ export default {
   },
   async mounted() {
     this.checkSubscription();
-    this._timer = setTimeout(() => {
+    this._loadingTimer = setTimeout(() => {
       if (loading) {
         this.subscribed = true; // don't show subscribe button if something is broken
         this.loading = false;
       }
     }, 5 * 1000); // timeout in 5 seconds
-    setTimeout(() => { this.reset(); }, 30 * 1000); // reset in 30 seconds
+    this._resetTimer = setTimeout(() => { this.reset(); }, 30 * 1000); // reset in 30 seconds
   },
   computed: {
     contentContainerStyle() {
@@ -70,7 +70,7 @@ export default {
       } else {
         this.subscribed = true; // don't show subscribe button if something went wrong
       }
-      if (this._timer) clearTimeout(this._timer);
+      if (this._loadingTimer) clearTimeout(this._timer);
       this.loading = false;
     },
 
@@ -110,6 +110,7 @@ export default {
     },
 
     reset() {
+      if (this._resetTimer) clearTimeout(this._resetTimer);
       this.screenProps.store.commit('reset');
       this.navigation.popToTop();
     },
