@@ -51,13 +51,17 @@ export default {
     RadioItem,
   },
   data: function() {
+    const state = this.screenProps.store.state;
     return {
-      name: '',
-      childName: '',
-      email: '',
-      userType: '',
+      name: state.name,
+      childName: state.childName,
+      email: state.email,
+      userType: state.userType,
       ready: null,
     };
+  },
+  async mounted() {
+    setTimeout(() => { this.readyNext(); }, 500);
   },
   computed: {
     contentContainerStyle() {
