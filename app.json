@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Check-in",
-    "slug": "tk-ios",
+    "slug": "tk-check-in",
     "privacy": "public",
     "sdkVersion": "33.0.0",
     "platforms": [
@@ -24,7 +24,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "org.tinkerkitchen.tk-check-in",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to scan member & ticket QR codes."
+      }
     },
     "packagerOpts": {
       "config": "metro.config.js"
