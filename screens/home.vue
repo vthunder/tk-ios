@@ -91,7 +91,7 @@ export default {
             store.commit('setEmail', qr.email);
             store.commit('setUserType', 'member');
             store.commit('setChildName', '');
-            this.navigation.navigate('Form');
+            this.navigation.navigate('Legal');
           } else if (qr.type === 'daypass') {
           } else if (qr.type === 'ticket') {
           } else {
