@@ -37,7 +37,7 @@ export default {
     return {
       hasCameraPermission: null,
       type: BarCodeScanner.Constants.Type.front,
-      qrData: null,
+      qrStop: false,
       logoImg,
       qrCodeImg
     };
@@ -45,6 +45,11 @@ export default {
   async mounted() {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
     this.hasCameraPermission = status;
+    this.navigation.addListener('willBlur', () => this.qrStop = true);
+    this.navigation.addListener('didFocus', () => this.qrStop = false);
+  },
+  destroyed() {
+    this.qrStop = true;
   },
   computed: {
     contentContainerStyle() {
@@ -57,8 +62,8 @@ export default {
   },
   methods: {
     async onScanned({ type, data }) {
-      if (this.qrData) return;
-      this.qrData = data;
+      if (this.qrStop) return;
+      this.qrStop = true;
 
       try {
         const ret = await this.screenProps.client.mutate({
@@ -96,7 +101,6 @@ export default {
       } catch(e) {
         // do nothing on invalid/unknown qr codes
       }
-      this.qrData = null;
     },
 
     goToForm() {
