@@ -11,7 +11,6 @@
         <awesome-button type="primary" :on-press="goToForm">Tap to Check In</awesome-button>
       </view>
     </view>
-    <image class="qr-code" :source="qrCodeImg"/>
   </scroll-view>
 </template>
 
@@ -22,7 +21,6 @@ import * as Permissions from 'expo-permissions';
 import { gql } from 'apollo-boost';
 
 import logoImg from "../assets/logo.png";
-import qrCodeImg from "../assets/qr-code.png";
 
 export default {
   props: {
@@ -39,7 +37,6 @@ export default {
       type: BarCodeScanner.Constants.Type.front,
       qrStop: false,
       logoImg,
-      qrCodeImg
     };
   },
   async mounted() {

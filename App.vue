@@ -21,6 +21,7 @@ const store = new Vuex.Store({
     email: null,
     userType: null,
     childName: null,
+    printerUri: null,
   },
   mutations: {
     setName(state, value) {
@@ -35,11 +36,15 @@ const store = new Vuex.Store({
     setChildName(state, value) {
       state.childName = value;
     },
+    setPrinterUri(state, value) {
+      state.printerUri = value;
+    },
     reset(state) {
       state.name = null;
       state.email = null;
       state.userType = null;
       state.childName = null;
+      // note: we leave printerUri as is
     },
   }
 });

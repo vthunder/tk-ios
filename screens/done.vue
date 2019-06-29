@@ -2,14 +2,17 @@
   <view v-if="loading" class="loading"><text>Loading...</text></view>
   <scroll-view v-else :content-container-style="contentContainerStyle">
     <text class="h2">Thanks for checking in!</text>
+    <text v-if="printerUri" class="h3 my-2">Printing badge...</text>
     <view v-if="subscribed === false" class="horizontal mt-4">
       <awesome-button class="mr-4" type="primary" :on-press="subscribe">
         Subscribe to Our Email List
       </awesome-button>
-      <awesome-button type="secondary" :on-press="reset">No Thanks</awesome-button>
+      <awesome-button v-if="printerUri" type="secondary" :on-press="reset">No Thanks</awesome-button>
+      <awesome-button v-else type="secondary" :on-press="printAndDone">No Thanks - Print Badge</awesome-button>
     </view>
     <view v-else-if="subscribed" class="mt-4">
-      <awesome-button type="primary" :on-press="reset">Done</awesome-button>
+      <awesome-button v-if="printerUri" type="primary" :on-press="reset">Done</awesome-button>
+      <awesome-button v-else type="primary" :on-press="printAndDone">Print Badge</awesome-button>
     </view>
   </scroll-view>
 </template>
@@ -17,6 +20,8 @@
 <script>
 import AwesomeButton from 'react-native-really-awesome-button/src/themes/blue';
 import { gql } from 'apollo-boost';
+import moment from 'moment';
+import * as Print from 'expo-print';
 
 export default {
   props: {
@@ -36,6 +41,7 @@ export default {
     };
   },
   async mounted() {
+    if (this.printerUri) this.print();
     this.checkSubscription();
     this._loadingTimer = setTimeout(() => {
       if (this.loading) {
@@ -49,8 +55,56 @@ export default {
     contentContainerStyle() {
       return { alignItems: 'center', justifyContent: 'center', flex: 1 };
     },
+    printerUri() {
+      return this.screenProps.store.state.printerUri;
+    },
+    userName() {
+      return this.screenProps.store.state.name;
+    },
+    userType() {
+      const state = this.screenProps.store.state;
+      if (state.userType === 'member') return 'Tinker Kitchen Member';
+      if (state.userType === 'guest') return 'Guest';
+      if (state.userType === 'daypass-ticket') return 'Day-pass / Ticket';
+      if (state.userType === 'child') return 'Child';
+    },
   },
   methods: {
+    async printAndDone() {
+      await this.print();
+      this.reset();
+    },
+    async print() {
+      const store = this.screenProps.store;
+      if (!store.state.printerUri) {
+        const printer = await Print.selectPrinterAsync();
+        store.commit('setPrinterUri', printer.url);
+      }
+      await Print.printAsync({
+        html: `
+          <style>
+            @page { margin: 0px; }
+            * { font-family: sans-serif; margin: 0; }
+            .content {
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+            }
+            .name { font-size: 92; }
+            .type { font-size: 42; flex-grow: 1; }
+            .date { font-size: 32; }
+          </style>
+          <div class="content">
+            <h1 class="name">${this.userName}</h1>
+            <h2 class="type">${this.userType}</h2>
+            <p class="date">Checked in on: ${moment().format('MMMM Do YYYY')}</p>
+          </div>`,
+        orientation: Print.Orientation.portrait,
+        width: 612,
+        height: 410,
+        printerUrl: store.state.printerUri,
+      });
+    },
     async checkSubscription() {
       const state = this.screenProps.store.state;
       const client = this.screenProps.client;
@@ -130,6 +184,8 @@ export default {
     justify-content: center;
 }
 .h2 { font-size: 24; }
+.h3 { font-size: 18; }
+.my-2 { margin-top: 10; margin-bottom: 10; }
 .mt-4 { margin-top: 20; }
 .mr-4 { margin-right: 20; }
 </style>
