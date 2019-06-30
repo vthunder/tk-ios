@@ -70,9 +70,9 @@ export default {
                 type
                 name
                 email
+                user_status
                 purchase_name
                 purchase_email
-                membership_status
                 consumable_status
               }
             }
@@ -83,10 +83,9 @@ export default {
           const store = this.screenProps.store;
           const qr = ret.data.check_in_qr_scan;
           if (qr.type === 'user') {
-            // todo: check membership status
             store.commit('setName', qr.name);
             store.commit('setEmail', qr.email);
-            store.commit('setUserType', 'member');
+            store.commit('setUserType', qr.user_status);
             store.commit('setChildName', '');
             this.navigation.navigate('Legal');
           } else if (qr.type === 'daypass') {

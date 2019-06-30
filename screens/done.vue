@@ -63,7 +63,9 @@ export default {
     },
     userType() {
       const state = this.screenProps.store.state;
-      if (state.userType === 'member') return 'Tinker Kitchen Member';
+      if (state.userType === 'member') return 'Member';
+      if (state.userType === 'founding-member') return 'Founding Member';
+      if (state.userType === 'staff') return 'STAFF';
       if (state.userType === 'guest') return 'Guest';
       if (state.userType === 'daypass-ticket') return 'Day-pass / Ticket';
       if (state.userType === 'child') return 'Child';
