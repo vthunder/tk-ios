@@ -95,7 +95,8 @@ export default {
           }
         }
       } catch(e) {
-        // do nothing on invalid/unknown qr codes
+        // do nothing on invalid/unknown qr codes, but resume scanning
+        this.qrStop = false;
       }
     },
 
