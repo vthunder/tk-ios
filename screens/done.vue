@@ -60,7 +60,7 @@ export default {
     },
     userName() {
       if (this.screenProps.store.state.name === 'Ashley Qian')
-        return `Ashley Qian ☆☆☆`
+        return `Ashley Qian &#9734;&#9734;&#9734;`
       return this.screenProps.store.state.name;
     },
     userType() {
