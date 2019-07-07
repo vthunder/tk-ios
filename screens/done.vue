@@ -59,6 +59,8 @@ export default {
       return this.screenProps.store.state.printerUri;
     },
     userName() {
+      if (this.screenProps.store.state.name === 'Ashley Qian')
+        return `Ashley Qian ☆☆☆`
       return this.screenProps.store.state.name;
     },
     userType() {
