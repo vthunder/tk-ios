@@ -36,7 +36,7 @@ export default {
   },
   computed: {
     contentContainerStyle() {
-      return { alignItems: 'center', justifyContent: 'center' };
+      return { alignItems: 'center', justifyContent: 'space-around', paddingTop: 20, overflow: 'scroll' };
     },
     currentTerms() {
       return this.terms[this.current];
@@ -115,8 +115,9 @@ export default {
     flex: 1;
 }
 .terms {
-    width: 700;
-    height: 900;
+    align-content: stretch;
+    width: 840;
+    height: 1000;
     border-width: 1;
     border-color: black;
     margin-bottom: 5;
