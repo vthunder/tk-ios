@@ -22,6 +22,7 @@ import AwesomeButton from 'react-native-really-awesome-button/src/themes/blue';
 import { gql } from 'apollo-boost';
 import moment from 'moment';
 import * as Print from 'expo-print';
+import { Platform } from 'react-native';
 
 export default {
   props: {
@@ -70,7 +71,7 @@ export default {
       if (state.userType === 'staff') return 'STAFF';
       if (state.userType === 'guest') return 'Guest';
       if (state.userType === 'daypass-ticket') return 'Day-pass / Ticket';
-      if (state.userType === 'child') return 'Child';
+      if (state.userType === 'child') return '';
     },
   },
   methods: {
@@ -79,6 +80,7 @@ export default {
       this.reset();
     },
     async print() {
+      if (Platform.OS !== 'ios') return;
       const store = this.screenProps.store;
       if (!store.state.printerUri) {
         const printer = await Print.selectPrinterAsync();
