@@ -76,6 +76,7 @@ export default {
     readyNext() {
       this.ready = false;
       if (!this.name || !this.email || !this.userType) return;
+      if (this.name.split(' ').length < 1) return;
       if (this.userType === 'child' && !this.childName) return;
       this.ready = true;
     },
