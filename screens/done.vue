@@ -42,8 +42,12 @@
      };
    },
    async mounted() {
-     if (this.printerUri) this.print();
      this.checkSubscription();
+     const printRet = await this.print();
+     if (printRet) { // returns non-nil on error, try re-selecting printer
+       await this.selectPrinter();
+       this.print();
+     }
      this._loadingTimer = setTimeout(() => {
        if (this.loading) {
          this.subscribed = true; // don't show subscribe button if something is broken
@@ -58,11 +62,6 @@
      },
      printerUri() {
        return this.screenProps.store.state.printerUri;
-     },
-     userName() {
-       if (this.screenProps.store.state.name === 'Ashley Qian')
-         return `Ashley Qian &#9734;&#9734;&#9734;`
-       return this.screenProps.store.state.name;
      },
      userType() {
        const state = this.screenProps.store.state;
@@ -79,37 +78,44 @@
        await this.print();
        this.reset();
      },
+     async selectPrinter() {
+       const printer = await Print.selectPrinterAsync();
+       this.screenProps.store.commit('setPrinterUri', printer.url);
+     },
      async print() {
        if (Platform.OS !== 'ios') return;
-       const store = this.screenProps.store;
-       if (!store.state.printerUri) {
-         const printer = await Print.selectPrinterAsync();
-         store.commit('setPrinterUri', printer.url);
+       const state = this.screenProps.store.state;
+
+       if (!state.printerUri) await this.selectPrinter();
+
+       try {
+	 await Print.printAsync({
+           html: `
+             <style>
+              @page { margin: 0px; }
+              * { font-family: sans-serif; margin: 0; }
+              .content {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+              }
+              .name { font-size: 92; }
+              .type { font-size: 42; flex-grow: 1; }
+              .date { font-size: 32; }
+             </style>
+             <div class="content">
+               <h1 class="name">${state.name}</h1>
+               <h2 class="type">${this.userType}</h2>
+               <p class="date">Checked in on: ${moment().format('MMMM Do YYYY')}</p>
+             </div>`,
+           orientation: Print.Orientation.portrait,
+           width: 612,
+           height: 410,
+           printerUrl: state.printerUri,
+	 });
+       } catch (e) {
+	 return e;
        }
-       await Print.printAsync({
-         html: `
-           <style>
-            @page { margin: 0px; }
-            * { font-family: sans-serif; margin: 0; }
-            .content {
-              height: 100%;
-              display: flex;
-              flex-direction: column;
-            }
-            .name { font-size: 92; }
-            .type { font-size: 42; flex-grow: 1; }
-            .date { font-size: 32; }
-           </style>
-           <div class="content">
-             <h1 class="name">${this.userName}</h1>
-             <h2 class="type">${this.userType}</h2>
-             <p class="date">Checked in on: ${moment().format('MMMM Do YYYY')}</p>
-           </div>`,
-         orientation: Print.Orientation.portrait,
-         width: 612,
-         height: 410,
-         printerUrl: store.state.printerUri,
-       });
      },
      async checkSubscription() {
        const state = this.screenProps.store.state;
@@ -179,19 +185,19 @@
 </script>
 
 <style>
- .loading, .container {
-   align-items: center;
-   justify-content: center;
-   flex: 1;
- }
- .horizontal {
-   flex-direction: row;
-   align-items: center;
-   justify-content: center;
- }
- .h2 { font-size: 24; }
- .h3 { font-size: 18; }
- .my-2 { margin-top: 10; margin-bottom: 10; }
- .mt-4 { margin-top: 20; }
- .mr-4 { margin-right: 20; }
+.loading, .container {
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+.horizontal {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+.h2 { font-size: 24; }
+.h3 { font-size: 18; }
+.my-2 { margin-top: 10; margin-bottom: 10; }
+.mt-4 { margin-top: 20; }
+.mr-4 { margin-right: 20; }
 </style>
