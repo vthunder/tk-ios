@@ -3,72 +3,72 @@
 </template>
 
 <script>
-import Vue from 'vue-native-core';
-import Vuex from 'vuex';
-import { StackNavigator } from 'vue-native-router';
-import ApolloClient from 'apollo-boost';
+ import Vue from 'vue-native-core';
+ import Vuex from 'vuex';
+ import { StackNavigator } from 'vue-native-router';
+ import ApolloClient from 'apollo-boost';
 
-import HomeScreen from './screens/home';
-import FormScreen from './screens/form';
-import LegalScreen from './screens/legal';
-import DoneScreen from './screens/done';
+ import HomeScreen from './screens/home';
+ import FormScreen from './screens/form';
+ import LegalScreen from './screens/legal';
+ import DoneScreen from './screens/done';
 
-Vue.use(Vuex);
+ Vue.use(Vuex);
 
-const store = new Vuex.Store({
-  state: {
-    name: null,
-    email: null,
-    userType: null,
-    childName: null,
-    printerUri: null,
-  },
-  mutations: {
-    setName(state, value) {
-      state.name = value;
-    },
-    setEmail(state, value) {
-      state.email = value;
-    },
-    setUserType(state, value) {
-      state.userType = value;
-    },
-    setChildName(state, value) {
-      state.childName = value;
-    },
-    setPrinterUri(state, value) {
-      state.printerUri = value;
-    },
-    reset(state) {
-      state.name = null;
-      state.email = null;
-      state.userType = null;
-      state.childName = null;
-      // note: we leave printerUri as is
-    },
-  }
-});
+ const store = new Vuex.Store({
+   state: {
+     name: null,
+     email: null,
+     userType: null,
+     childName: null,
+     printerUri: "ipp://BRW283A4D6E0E18.local.:631/ipp/print",
+   },
+   mutations: {
+     setName(state, value) {
+       state.name = value;
+     },
+     setEmail(state, value) {
+       state.email = value;
+     },
+     setUserType(state, value) {
+       state.userType = value;
+     },
+     setChildName(state, value) {
+       state.childName = value;
+     },
+     setPrinterUri(state, value) {
+       state.printerUri = value;
+     },
+     reset(state) {
+       state.name = null;
+       state.email = null;
+       state.userType = null;
+       state.childName = null;
+       // note: we leave printerUri as is
+     },
+   }
+ });
 
-const client = new ApolloClient({ uri: 'https://tinkerkitchen.org/api' });
+ const client = new ApolloClient({ uri: 'https://tinkerkitchen.org/api' });
 
-const AppNavigation = StackNavigator(
-  {
-    Home: HomeScreen,
-    Form: FormScreen,
-    Legal: LegalScreen,
-    Done: DoneScreen,
-  },
-  { initialRouteName: 'Home' }
-);
+ const AppNavigation = StackNavigator(
+   {
+     Home: HomeScreen,
+     Form: FormScreen,
+     Legal: LegalScreen,
+     Done: DoneScreen,
+   },
+   { initialRouteName: 'Home' }
+ );
 
-export default {
-  components: {
-    AppNavigation,
-  },
-  data() {
-    return {
-      screenProps: { client, store },
-    }
-  },
-};
+ export default {
+   components: {
+     AppNavigation,
+   },
+   data() {
+     return {
+       screenProps: { client, store },
+     }
+   },
+ };
 </script>
