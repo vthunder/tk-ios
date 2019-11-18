@@ -24,126 +24,126 @@
 </template>
 
 <script>
-import React from 'react';
-import RadioItem from '../components/radioItem';
-import AwesomeButton from 'react-native-really-awesome-button/src/themes/blue';
-import { BarCodeScanner } from 'expo-barcode-scanner';
-import * as Permissions from 'expo-permissions';
-import { gql } from 'apollo-boost';
+ import React from 'react';
+ import RadioItem from '../components/radioItem';
+ import AwesomeButton from 'react-native-really-awesome-button/src/themes/blue';
+ import { BarCodeScanner } from 'expo-barcode-scanner';
+ import * as Permissions from 'expo-permissions';
+ import { gql } from 'apollo-boost';
 
-import logoImg from "../assets/logo.png";
+ import logoImg from "../assets/logo.png";
 
-export default {
-  props: {
-    navigation: { type: Object },
-    screenProps: { type: Object },
-  },
-  components: {
-    AwesomeButton,
-    BarCodeScanner,
-    RadioItem,
-  },
-  data() {
-    const state = this.screenProps.store.state;
-    return {
-      name: state.name,
-      childName: state.childName,
-      email: state.email,
-      ready: null,
-      hasCameraPermission: null,
-      type: BarCodeScanner.Constants.Type.front,
-      qrStop: false,
-      logoImg,
-    };
-  },
-  async mounted() {
-    const { status } = await Permissions.askAsync(Permissions.CAMERA);
-    this.hasCameraPermission = status;
-    this.navigation.addListener('willBlur', () => this.qrStop = true);
-    this.navigation.addListener('didFocus', () => this.qrStop = false);
-    setTimeout(() => { this.readyNext(); }, 500);
-  },
-  destroyed() {
-    this.qrStop = true;
-  },
-  computed: {
-    contentContainerStyle() {
-      return {
-        alignItems: 'center',
-        backgroundColor: 'white',
-        flex: 1,
-      };
-    },
-  },
-  methods: {
-    readyNext() {
-      this.ready = false;
-      if (!this.name || !this.email) return;
-      if (this.name.split(' ').length < 1) return;
-      this.ready = true;
-    },
+ export default {
+   props: {
+     navigation: { type: Object },
+     screenProps: { type: Object },
+   },
+   components: {
+     AwesomeButton,
+     BarCodeScanner,
+     RadioItem,
+   },
+   data() {
+     const state = this.screenProps.store.state;
+     return {
+       name: state.name,
+       childName: state.childName,
+       email: state.email,
+       ready: null,
+       hasCameraPermission: null,
+       type: BarCodeScanner.Constants.Type.front,
+       qrStop: false,
+       logoImg,
+     };
+   },
+   async mounted() {
+     const { status } = await Permissions.askAsync(Permissions.CAMERA);
+     this.hasCameraPermission = status;
+     this.navigation.addListener('willBlur', () => this.qrStop = true);
+     this.navigation.addListener('didFocus', () => this.qrStop = false);
+     setTimeout(() => { this.readyNext(); }, 500);
+   },
+   destroyed() {
+     this.qrStop = true;
+   },
+   computed: {
+     contentContainerStyle() {
+       return {
+         alignItems: 'center',
+         backgroundColor: 'white',
+         flex: 1,
+       };
+     },
+   },
+   methods: {
+     readyNext() {
+       this.ready = false;
+       if (!this.name || !this.email) return;
+       if (this.name.split(' ').length < 1) return;
+       this.ready = true;
+     },
 
-    next() {
-      const store = this.screenProps.store;
-      store.commit('setName', this.name);
-      store.commit('setEmail', this.email);
-      store.commit('setUserType', 'unknown');
-      store.commit('setChildName', this.childName);
-      this.navigation.navigate('Legal');
-    },
-    async onScanned({ type, data }) {
-      if (this.qrStop) return;
-      this.qrStop = true;
+     next() {
+       const store = this.screenProps.store;
+       store.commit('setName', this.name);
+       store.commit('setEmail', this.email);
+       store.commit('setUserType', 'unknown');
+       store.commit('setChildName', this.childName);
+       this.navigation.navigate('Legal');
+     },
+     async onScanned({ type, data }) {
+       if (this.qrStop) return;
+       this.qrStop = true;
 
-      try {
-        const ret = await this.screenProps.client.mutate({
-          mutation: gql`
-            mutation checkInQrScan($qr_data: String!) {
-              check_in_qr_scan(qr_data: $qr_data) {
-                type
-                name
-                email
-                user_status
-                purchase_name
-                purchase_email
-                consumable_status
-              }
-            }
-          `,
-          variables: { qr_data: data },
-        });
-        if (ret.data.check_in_qr_scan) {
-          const store = this.screenProps.store;
-          const qr = ret.data.check_in_qr_scan;
-          if (qr.type === 'user') {
-            store.commit('setName', qr.name);
-            store.commit('setEmail', qr.email);
-            store.commit('setUserType', qr.user_status);
-            store.commit('setChildName', '');
-            this.navigation.navigate('Legal');
-          } else if (qr.type === 'daypass') {
-          } else if (qr.type === 'ticket') {
-          } else {
-            // unknown qr code type
-          }
-        }
-      } catch(e) {
-        // do nothing on invalid/unknown qr codes, but resume scanning
-        this.qrStop = false;
-      }
-    },
+       try {
+         const ret = await this.screenProps.client.mutate({
+           mutation: gql`
+             mutation checkInQrScan($qr_data: String!) {
+               check_in_qr_scan(qr_data: $qr_data) {
+                 type
+                 name
+                 email
+                 user_status
+                 purchase_name
+                 purchase_email
+                 consumable_status
+               }
+             }
+           `,
+           variables: { qr_data: data },
+         });
+         if (ret.data.check_in_qr_scan) {
+           const store = this.screenProps.store;
+           const qr = ret.data.check_in_qr_scan;
+           if (qr.type === 'user') {
+             store.commit('setName', qr.name);
+             store.commit('setEmail', qr.email);
+             store.commit('setUserType', qr.user_status);
+             store.commit('setChildName', '');
+             this.navigation.navigate('Legal');
+           } else if (qr.type === 'daypass') {
+           } else if (qr.type === 'ticket') {
+           } else {
+             // unknown qr code type
+           }
+         }
+       } catch(e) {
+         // do nothing on invalid/unknown qr codes, but resume scanning
+         this.qrStop = false;
+       }
+     },
 
-    goToForm() {
-      this.reset();
-      this.navigation.navigate('Form');
-    },
+     goToForm() {
+       this.reset();
+       this.navigation.navigate('Form');
+     },
 
-    reset() {
-      const store = this.screenProps.store;
-      store.commit('reset');
-    },
-  },
-};
+     reset() {
+       const store = this.screenProps.store;
+       store.commit('reset');
+     },
+   },
+ };
 </script>
 
 <style>
