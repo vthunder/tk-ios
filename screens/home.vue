@@ -1,21 +1,27 @@
 <template>
   <scroll-view v-else ref="topview" :content-container-style="contentContainerStyle">
     <view class="top">
-      <bar-code-scanner :type="type" :on-bar-code-scanned="onScanned" />
-      <image class="logo" :source="logoImg" />
+      <view v-if="!qrStop && !qrPause">
+	<bar-code-scanner :type="type" :on-bar-code-scanned="onScanned" />
+      </view>
       <text class="welcome">Welcome! Hold your pass/ticket to the camera to scan</text>
+      <image class="logo" :source="logoImg" />
       <view class="form">
         <text class="h3">No pass? No worries! Fill out your name & email:</text>
-        <text class="h4 mb-4">(no spam, we promise!)</text>
+        <text class="h4 mb-2">(no spam, we promise!)</text>
 
-        <text-input v-model="name" placeholder="Full Name" class="text-box mb-4" :on-change-text="readyNext" />
-        <text-input v-model="email" placeholder="Email" class="text-box mb-4"
+        <text-input v-model="name" placeholder="Full Name" class="text-box mb-2"
+                    :auto-correct="false"
+		    :context-menu-hidden="true"
+                    :on-change-text="readyNext" />
+        <text-input v-model="email" placeholder="Email" class="text-box mb-2"
                     auto-capitalize="none"
                     :auto-correct="false"
+		    :context-menu-hidden="true"
                     keyboard-type="email-address"
-                    auto-complete-type="email"
                     text-content-type="emailAddress"
-                    :on-change-text="readyNext" />
+                    :on-change-text="readyNext"
+		    :on-submit-editing="next" />
 
         <button title="Next" :disabled="!ready" :on-press="next" />
       </view>
@@ -46,22 +52,24 @@
    data() {
      const state = this.screenProps.store.state;
      return {
-       name: state.name,
-       childName: state.childName,
-       email: state.email,
+       name: "",
+       childName: "",
+       email: "",
        ready: null,
        hasCameraPermission: null,
        type: BarCodeScanner.Constants.Type.front,
        qrStop: false,
+       qrPause: false,
        logoImg,
      };
    },
    async mounted() {
      const { status } = await Permissions.askAsync(Permissions.CAMERA);
      this.hasCameraPermission = status;
-     this.navigation.addListener('willBlur', () => this.qrStop = true);
-     this.navigation.addListener('didFocus', () => this.qrStop = false);
+     this.navigation.addListener('willBlur', () => this.onBlur());
+     this.navigation.addListener('didFocus', () => this.onFocus());
      setTimeout(() => { this.readyNext(); }, 500);
+     setInterval(() => { this.qrTick(); }, 750);
    },
    destroyed() {
      this.qrStop = true;
@@ -76,6 +84,23 @@
      },
    },
    methods: {
+     onBlur() {
+       this.resetForm();
+       this.qrStop = true;
+     },
+     onFocus() {
+       this.qrStop = false;
+       this.resetForm();
+     },
+     resetForm() {
+       this.name = "";
+       this.childName = "";
+       this.email = "";
+     },
+     qrTick() {
+       // toggles QR scanning on & off to reduce power use
+       this.qrPause = !this.qrPause;
+     },
      readyNext() {
        this.ready = false;
        if (!this.name || !this.email) return;
@@ -99,7 +124,7 @@
          const ret = await this.screenProps.client.mutate({
            mutation: gql`
              mutation checkInQrScan($qr_data: String!) {
-               check_in_qr_scan(qr_data: $qr_data) {
+	       check_in_qr_scan(qr_data: $qr_data) {
                  type
                  name
                  email
@@ -107,7 +132,7 @@
                  purchase_name
                  purchase_email
                  consumable_status
-               }
+	       }
              }
            `,
            variables: { qr_data: data },
@@ -150,7 +175,7 @@
 .top {
     flex: 0.8;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
 }
 .logo {
     width: 200;
